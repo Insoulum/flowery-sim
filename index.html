@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flowery Sim</title>
+    <link rel="preload" as="image" href="ralsei_frames/down/frame_00.png" />
+    <link rel="preload" as="image" href="ralsei_frames/left/frame_00.png" />
+    <link rel="preload" as="image" href="ralsei_frames/up/frame_00.png" />
+    <link rel="preload" as="image" href="uploads/flowery_splat_particle.png" />
+    <link rel="preload" as="image" href="uploads/flowery_spawner.png" />
+    <link rel="preload" as="image" href="uploads/flowery_spawner_spawn_particle.png" />
+    <link rel="preload" as="image" href="bg_tiles.png" />
+    <link rel="preload" as="image" href="uploads/car_ralsei.png" />
+    <link rel="preload" as="image" href="uploads/clark_stanky_leg_pixelated.png" />
+    <link rel="preload" as="image" href="uploads/flowery_grave.png" />
+    <link rel="preload" as="image" href="uploads/icon_web_error.png" />
+    <link rel="preload" as="image" href="yellow_frames/down/frame_00.png" />
+    <link rel="preload" as="image" href="yellow_frames/left/frame_00.png" />
+    <link rel="preload" as="image" href="yellow_frames/up/frame_00.png" />
+    <link rel="preload" as="image" href="uploads/yellow_gun.png" />
+    <link rel="preload" href="uploads/big-shot.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="uploads/Perfect_DOS_VGA_437_Win.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" as="audio" href="txt_ral.mp3" />
+    <link rel="preload" as="audio" href="uploads/Toby_Fox_-_Flower_Castle.mp3" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <main id="game-scene" class="scene" aria-label="Flowery Sim">
+      <canvas id="scene" aria-label="Floweries, Yellow, Ralsei, spawners, cars, and effects over a tiled background"></canvas>
+      <div id="ralsei-line" class="ralsei-line" role="status" aria-live="polite" hidden></div>
+      <div class="flowery-counter" role="status" aria-live="polite">
+        <span>FLOWERIES</span>
+        <strong><span id="flowery-count">0</span><span id="flowery-count-limit" class="flowery-count-limit">/500</span></strong>
+        <small id="flowery-warning" hidden>WARNING: TOO MANY FLOWERIES</small>
+      </div>
+      <div class="death-counter" aria-live="polite">
+        <span>floweries KILLED</span>
+        <strong id="death-count">0</strong>
+      </div>
+      <div id="cheats-status" class="cheats-status" role="status" hidden>SV_CHEATS 1 · SAVING DISABLED</div>
+      <div class="controls">
+        <button id="spawn" type="button">spawn a flowery</button>
+        <button id="death-menu-button" type="button">death menu</button>
+        <button id="save-menu-button" type="button">save menu</button>
+        <button id="achievement-menu-button" type="button">achievements</button>
+      </div>
+      <div id="scene-navigation" class="scene-navigation" hidden>
+        <button id="pan-scene" type="button" aria-pressed="false" title="Toggle pan mode, then drag the scene">pan scene</button>
+        <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+        <output id="zoom-level" aria-live="polite">100%</output>
+        <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+      </div>
+      <button id="settings-button" class="settings-button" type="button" aria-label="Audio settings" title="Audio settings">⚙</button>
+      <div id="slash-overlay" class="slash-overlay" aria-hidden="true" hidden>
+        <img id="slash-sprite" src="uploads/swoon_slash.png" alt="" />
+      </div>
+      <section id="settings-panel" class="settings-panel" aria-labelledby="settings-title" aria-modal="true" role="dialog" hidden>
+        <div class="settings-card">
+          <div class="settings-heading">
+            <h2 id="settings-title">AUDIO</h2>
+            <button id="close-settings" class="close-settings" type="button" aria-label="Close audio settings">×</button>
+          </div>
+          <label class="volume-control">
+            <span>Voice clips <output id="voice-volume-value">100%</output></span>
+            <input id="voice-volume" type="range" min="0" max="1" step="0.01" value="1" />
+          </label>
+          <label class="volume-control">
+            <span>SFX <output id="sfx-volume-value">100%</output></span>
+            <input id="sfx-volume" type="range" min="0" max="1" step="0.01" value="1" />
+          </label>
+          <label class="volume-control">
+            <span>Music <output id="music-volume-value">35%</output></span>
+            <input id="music-volume" type="range" min="0" max="1" step="0.01" value="0.35" />
+          </label>
+        </div>
+      </section>
+    </main>
+    <aside class="shop-panel" aria-label="Shop and rebirth upgrades">
+      <div class="shop-heading">
+        <div class="currency-row">
+          <span>FLOWEY CURRENCY</span>
+          <strong id="currency-count">ƒ0</strong>
+        </div>
+      </div>
+      <button id="buy-monsterbox" type="button">Spawn Monsterbox · ƒ250</button>
+      <button id="upgrade-monsterbox-rate" type="button" hidden>Monsterbox spawn rate</button>
+      <button id="buy-toolbar" type="button">Toolbar · ƒ200</button>
+      <button id="buy-autospawn" type="button">Autospawn floweries · ƒ25</button>
+      <button id="buy-bigger-scene" type="button">Make scene bigger · ƒ300</button>
+      <button id="buy-spawner" type="button">More flowery spawners · ƒ40</button>
+      <button id="buy-yellow" type="button">Spawn Yellow · ƒ75</button>
+      <button id="buy-car" type="button">Flowery crusher car · ƒ125</button>
+      <button id="buy-clark" type="button">Clark stanky leg · ƒ150</button>
+      <button id="buy-clark-knife" type="button">Clark knife · ƒ250</button>
+      <button id="buy-error-logo" type="button">[Object Object] · ƒ500</button>
+      <div id="yellow-controls" class="yellow-controls" hidden>
+        <button id="aim-gun" type="button">move gun</button>
+        <button id="shoot-gun" type="button">shoot</button>
+      </div>
+      <div id="toolbar-controls" class="toolbar-controls" aria-label="Attack tool" hidden>
+        <button type="button" data-tool="squish" aria-pressed="true">squish</button>
+        <button type="button" data-tool="lazer" aria-pressed="false">lazer</button>
+        <button type="button" data-tool="roaring blade" aria-pressed="false">roaring blade</button>
+      </div>
+      <section class="rebirth-shop" aria-label="Rebirth upgrades">
+        <div class="rebirth-heading">
+          <span>REBIRTHS</span>
+          <strong id="rebirth-points">0</strong>
+        </div>
+        <button id="rebirth-button" type="button" disabled>Rebirth · upgrades 0/10 maxed</button>
+        <button id="buy-rebirth-boxes" type="button">Extra Monsterbox · 2 rebirths</button>
+        <button id="buy-rebirth-spawner" type="button">Extra spawner · 1 rebirth</button>
+        <button id="buy-rebirth-currency" type="button">×1.5 currency · 3 rebirths</button>
+        <button id="buy-rebirth-limit" type="button">Higher Flowery limit · 2 rebirths</button>
+        <small id="rebirth-bonus"></small>
+      </section>
+      <p id="shop-status" class="shop-status">Earn ƒ5 for every flowery defeated.</p>
+    </aside>
+    <main id="death-menu" class="death-menu" aria-labelledby="death-title" hidden>
+      <header class="death-header">
+        <div>
+          <h1 id="death-title">FLOWERY GRAVEYARD</h1>
+          <p><span id="grave-count">0</span> floweries. You did this.</p>
+        </div>
+        <button id="return-to-game" type="button">back to game</button>
+      </header>
+      <div id="graveyard" class="graveyard" role="list" aria-label="Gravestones for dead floweries" tabindex="0"></div>
+      <p id="empty-graveyard" class="empty-graveyard" hidden>
+        No graves yet. The floweries are enjoying this suspiciously temporary peace.
+      </p>
+    </main>
+    <main id="save-menu" class="death-menu save-menu" aria-labelledby="save-title" hidden>
+      <header class="death-header">
+        <div>
+          <h1 id="save-title">SAVE MENU</h1>
+          <p id="save-menu-status">Your saves are stored in this browser.</p>
+        </div>
+        <div class="save-menu-actions">
+          <button id="new-save-button" type="button">new game</button>
+          <button id="close-save-menu" type="button">back to game</button>
+        </div>
+      </header>
+      <div id="save-list" class="save-list" role="list" aria-label="Saved games"></div>
+      <p id="empty-save-list" class="empty-graveyard" hidden>No saves found.</p>
+    </main>
+    <main id="achievement-menu" class="death-menu achievement-menu" aria-labelledby="achievement-title" hidden>
+      <header class="death-header">
+        <div>
+          <h1 id="achievement-title">ACHIEVEMENTS</h1>
+          <p id="achievement-summary">0 unlocked</p>
+        </div>
+        <button id="close-achievements" type="button">back to game</button>
+      </header>
+      <div id="achievement-list" class="achievement-list" role="list" aria-label="Game achievements"></div>
+    </main>
+    <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite" hidden>
+      <span class="achievement-toast-icon" aria-hidden="true">★</span>
+      <span><small>ACHIEVEMENT UNLOCKED</small><strong id="achievement-toast-title"></strong></span>
+    </div>
+    <section id="overload-overlay" class="overload-overlay" aria-label="Flowery overload" hidden>
+      <canvas id="shatter-canvas"></canvas>
+      <h1 id="overload-title">FLOWERY OVERLOAD!</h1>
+    </section>
+    <section id="game-over-screen" class="game-over-screen" aria-labelledby="game-over-title" hidden>
+      <h1 id="game-over-title">game over</h1>
+      <button id="try-again" type="button">try again</button>
+    </section>
+    <section id="error-secret" class="error-secret" aria-label="A strange error appeared" hidden>
+      <button id="error-secret-trigger" type="button" aria-label="Dismiss the strange error">
+        <img src="uploads/icon_web_error_flowery.png" alt="A Flowery error icon" draggable="false" />
+      </button>
+    </section>
+    <section id="cheats-console" class="cheats-console" aria-labelledby="cheats-console-title" hidden>
+      <header class="cheats-console-header">
+        <h2 id="cheats-console-title">BIOS DEBUG CONSOLE</h2>
+        <span id="cheats-console-mode">SAVING ENABLED</span>
+      </header>
+      <div id="cheats-console-output" class="cheats-console-output" role="log" aria-live="polite"></div>
+      <form id="cheats-console-form" class="cheats-console-form">
+        <label for="cheats-console-input">A:\&gt;</label>
+        <input id="cheats-console-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Console command" />
+      </form>
+      <div id="cheats-confirm" class="cheats-confirm" role="alertdialog" aria-modal="true" aria-labelledby="cheats-confirm-message" hidden>
+        <p id="cheats-confirm-message">When enabling this it will make a copy of your save that has cheats on, continue?</p>
+        <div>
+          <button id="confirm-cheats" type="button">continue</button>
+          <button id="cancel-cheats" type="button">cancel</button>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
