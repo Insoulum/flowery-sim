@@ -12,7 +12,6 @@
     <link rel="preload" as="image" href="uploads/flowery_spawner_spawn_particle.png" />
     <link rel="preload" as="image" href="bg_tiles.png" />
     <link rel="preload" as="image" href="uploads/car_ralsei.png" />
-    <link rel="preload" as="image" href="uploads/clark_stanky_leg_pixelated.png" />
     <link rel="preload" as="image" href="uploads/flowery_grave.png" />
     <link rel="preload" as="image" href="uploads/icon_web_error.png" />
     <link rel="preload" as="image" href="yellow_frames/down/frame_00.png" />
@@ -35,22 +34,15 @@
         <strong><span id="flowery-count">0</span><span id="flowery-count-limit" class="flowery-count-limit">/500</span></strong>
         <small id="flowery-warning" hidden>WARNING: TOO MANY FLOWERIES</small>
       </div>
-      <div class="death-counter" aria-live="polite">
-        <span>floweries KILLED</span>
-        <strong id="death-count">0</strong>
+      <div class="currency-counter" aria-live="polite">
+        <span>flowery currency</span>
+        <strong id="currency-count">ƒ0</strong>
       </div>
       <div id="cheats-status" class="cheats-status" role="status" hidden>SV_CHEATS 1 · SAVING DISABLED</div>
       <div class="controls">
-        <button id="spawn" type="button">spawn a flowery</button>
         <button id="death-menu-button" type="button">death menu</button>
         <button id="save-menu-button" type="button">save menu</button>
         <button id="achievement-menu-button" type="button">achievements</button>
-      </div>
-      <div id="scene-navigation" class="scene-navigation" hidden>
-        <button id="pan-scene" type="button" aria-pressed="false" title="Toggle pan mode, then drag the scene">pan scene</button>
-        <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out">−</button>
-        <output id="zoom-level" aria-live="polite">100%</output>
-        <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
       </div>
       <button id="settings-button" class="settings-button" type="button" aria-label="Audio settings" title="Audio settings">⚙</button>
       <div id="slash-overlay" class="slash-overlay" aria-hidden="true" hidden>
@@ -63,37 +55,28 @@
             <button id="close-settings" class="close-settings" type="button" aria-label="Close audio settings">×</button>
           </div>
           <label class="volume-control">
-            <span>Voice clips <output id="voice-volume-value">100%</output></span>
-            <input id="voice-volume" type="range" min="0" max="1" step="0.01" value="1" />
+            <span>Voice clips <output id="voice-volume-value">15%</output></span>
+            <input id="voice-volume" type="range" min="0" max="1" step="0.01" value="0.15" />
           </label>
           <label class="volume-control">
-            <span>SFX <output id="sfx-volume-value">100%</output></span>
-            <input id="sfx-volume" type="range" min="0" max="1" step="0.01" value="1" />
+            <span>SFX <output id="sfx-volume-value">15%</output></span>
+            <input id="sfx-volume" type="range" min="0" max="1" step="0.01" value="0.15" />
           </label>
           <label class="volume-control">
-            <span>Music <output id="music-volume-value">35%</output></span>
-            <input id="music-volume" type="range" min="0" max="1" step="0.01" value="0.35" />
+            <span>Music <output id="music-volume-value">15%</output></span>
+            <input id="music-volume" type="range" min="0" max="1" step="0.01" value="0.15" />
           </label>
         </div>
       </section>
     </main>
     <aside class="shop-panel" aria-label="Shop and rebirth upgrades">
-      <div class="shop-heading">
-        <div class="currency-row">
-          <span>FLOWEY CURRENCY</span>
-          <strong id="currency-count">ƒ0</strong>
-        </div>
-      </div>
       <button id="buy-monsterbox" type="button">Spawn Monsterbox · ƒ250</button>
       <button id="upgrade-monsterbox-rate" type="button" hidden>Monsterbox spawn rate</button>
       <button id="buy-toolbar" type="button">Toolbar · ƒ200</button>
       <button id="buy-autospawn" type="button">Autospawn floweries · ƒ25</button>
-      <button id="buy-bigger-scene" type="button">Make scene bigger · ƒ300</button>
       <button id="buy-spawner" type="button">More flowery spawners · ƒ40</button>
       <button id="buy-yellow" type="button">Spawn Yellow · ƒ75</button>
       <button id="buy-car" type="button">Flowery crusher car · ƒ125</button>
-      <button id="buy-clark" type="button">Clark stanky leg · ƒ150</button>
-      <button id="buy-clark-knife" type="button">Clark knife · ƒ250</button>
       <button id="buy-error-logo" type="button">[Object Object] · ƒ500</button>
       <div id="yellow-controls" class="yellow-controls" hidden>
         <button id="aim-gun" type="button">move gun</button>

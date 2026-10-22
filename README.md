@@ -5,14 +5,14 @@ A browser game where you spawn, squish, and manage an ever-growing army of Flowe
 
 ## Features
 
-- **Spawn Floweries** — click to bring them into the world, or let spawners do it for you.
+- **Spawn Floweries** — click the lamp or a flowery spawner to bring them into the world, or let spawners and the Monsterbox do it for you.
 - **Squish them** — earn Flowey Currency (ƒ) for every defeat.
-- **Shop upgrades** — autospawn, bigger scene, extra spawners, Yellow, cars, Clark, Clark's knife, toolbar, Monsterbox.
+- **Shop upgrades** — autospawn, extra spawners, Yellow, cars, toolbar, Monsterbox.
 - **Attack tools** — squish, lazer, and roaring blade.
 - **Rebirth system** — max every upgrade, then reset for permanent bonuses.
-- **Achievements** — 40+ unlockables, from "First Bloom" to "The Completionist".
+- **Achievements** — 37 unlockables, from "First Bloom" to "The Completionist".
 - **Cheats console** — press `~` (backquote) and type `sv_cheats 1`.
-- **Audio settings** — separate volume for voice, SFX, and music.
+- **Audio settings** — separate volume for voice, SFX, and music (all default to 15%).
 
 ## Quick Start
 

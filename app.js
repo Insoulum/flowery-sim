@@ -10,13 +10,11 @@ const shatterContext = shatterCanvas.getContext("2d");
 const overloadTitle = document.querySelector("#overload-title");
 const gameOverScreen = document.querySelector("#game-over-screen");
 const tryAgainButton = document.querySelector("#try-again");
-const spawnButton = document.querySelector("#spawn");
 const ralseiLine = document.querySelector("#ralsei-line");
 const gameScene = document.querySelector("#game-scene");
 const deathMenu = document.querySelector("#death-menu");
 const graveyard = document.querySelector("#graveyard");
 const emptyGraveyard = document.querySelector("#empty-graveyard");
-const deathCountLabel = document.querySelector("#death-count");
 const graveCountLabel = document.querySelector("#grave-count");
 const deathMenuButton = document.querySelector("#death-menu-button");
 const returnToGameButton = document.querySelector("#return-to-game");
@@ -38,12 +36,9 @@ const errorSecret = document.querySelector("#error-secret");
 const errorSecretTrigger = document.querySelector("#error-secret-trigger");
 const currencyCountLabel = document.querySelector("#currency-count");
 const buyAutospawnButton = document.querySelector("#buy-autospawn");
-const buyBiggerSceneButton = document.querySelector("#buy-bigger-scene");
 const buyYellowButton = document.querySelector("#buy-yellow");
 const buySpawnerButton = document.querySelector("#buy-spawner");
 const buyCarButton = document.querySelector("#buy-car");
-const buyClarkButton = document.querySelector("#buy-clark");
-const buyClarkKnifeButton = document.querySelector("#buy-clark-knife");
 const buyErrorLogoButton = document.querySelector("#buy-error-logo");
 const buyToolbarButton = document.querySelector("#buy-toolbar");
 const buyMonsterboxButton = document.querySelector("#buy-monsterbox");
@@ -64,11 +59,6 @@ const slashSprite = document.querySelector("#slash-sprite");
 const aimGunButton = document.querySelector("#aim-gun");
 const shootGunButton = document.querySelector("#shoot-gun");
 const shopStatus = document.querySelector("#shop-status");
-const sceneNavigation = document.querySelector("#scene-navigation");
-const panSceneButton = document.querySelector("#pan-scene");
-const zoomOutButton = document.querySelector("#zoom-out");
-const zoomInButton = document.querySelector("#zoom-in");
-const zoomLevelLabel = document.querySelector("#zoom-level");
 const settingsButton = document.querySelector("#settings-button");
 const settingsPanel = document.querySelector("#settings-panel");
 const closeSettingsButton = document.querySelector("#close-settings");
@@ -192,9 +182,6 @@ let pendingCheatsConfirmation = false;
 const CHEATS_CONSOLE_MAX_LINES = 100;
 const AUTOSPAWN_PRICE = 25;
 const AUTOSPAWN_MAX_LEVEL = 5;
-const BIGGER_SCENE_PRICE = 300;
-const MIN_SCENE_ZOOM = 0.5;
-const MAX_SCENE_ZOOM = 2.5;
 const FLOWERY_OVERLOAD_LIMIT = 500;
 const REBIRTH_EXTRA_BOX_LIMIT = 3;
 const REBIRTH_EXTRA_SPAWNER_LIMIT = 6;
@@ -206,8 +193,6 @@ const REBIRTH_CURRENCY_COST = 3;
 const REBIRTH_LIMIT_COST = 2;
 const YELLOW_PRICE = 75;
 const CAR_PRICE = 125;
-const CLARK_PRICE = 150;
-const CLARK_KNIFE_PRICE = 250;
 const ERROR_LOGO_PRICE = 500;
 const ERROR_LOGO_SIZE = 64;
 const ERROR_TRAIL_MIN_DELAY = 3000;
@@ -242,16 +227,6 @@ const TOOL_ATTACK_RADIUS = 190;
 const SLASH_ATTACK_DURATION = 2000;
 const LASER_EFFECT_DURATION = 800;
 const LASER_HIT_HALF_WIDTH = 58;
-const CLARK_ATTACKS = {
-  weak: { minTargets: 2, range: 100, duration: 500, cooldown: 1150 },
-  mid: { minTargets: 3, range: 150, duration: 620, cooldown: 1650 },
-  strong: { minTargets: 5, range: 210, duration: 760, cooldown: 2300 },
-};
-const CLARK_SHOCKWAVE_STYLES = {
-  weak: { color: "#ffc17a", glow: "#ff743b", width: 5, blur: 9 },
-  mid: { color: "#eaffaa", glow: "#b5ff4d", width: 8, blur: 16 },
-  strong: { color: "#fff4c2", glow: "#ffb52e", width: 13, blur: 26 },
-};
 const FLOWERY_SPAWNER_BASE_PRICE = 40;
 const FLOWERY_SPAWNER_PRICE_STEP = 30;
 const MAX_FLOWERY_SPAWNERS = 6;
@@ -294,15 +269,12 @@ const ACHIEVEMENT_DEFINITIONS = [
   { id: "overpopulation", title: "Overpopulation", description: "Reach the 500 Flowery limit.", symbol: "500", color: "#e5684d", stat: "peakFloweries", target: 500 },
   { id: "buy_a_car", title: "Pedal to the Petal", description: "Buy the Flowery crusher car.", symbol: "CAR", color: "#70c9dc" },
   { id: "yellow_friend", title: "Yellow Fellow", description: "Bring Yellow into the scene.", symbol: "Y", color: "#f4dc57" },
-  { id: "room_to_bloom", title: "Room to Bloom", description: "Expand the scene for the first time.", symbol: "↗", color: "#84c49a" },
   { id: "automation", title: "Garden Automation", description: "Buy your first autospawn upgrade.", symbol: "AUTO", color: "#7cc697" },
   { id: "full_throttle", title: "Full Throttle", description: "Reach maximum autospawn level.", symbol: "MAX", color: "#55aa83" },
   { id: "spawner_network", title: "Spawner Network", description: "Fill every regular Flowery spawner slot.", symbol: "NET", color: "#69bcae" },
   { id: "monsterbox", title: "Think Inside the Box", description: "Buy a Monsterbox.", symbol: "BOX", color: "#e58d55" },
   { id: "monsterbox_max", title: "Box Office Hit", description: "Max out the Monsterbox spawn rate.", symbol: "MAX", color: "#d77946" },
   { id: "toolbar", title: "Tool Time", description: "Unlock the attack toolbar.", symbol: "TOOL", color: "#b18adb" },
-  { id: "clark", title: "Stanky Leg", description: "Bring Clark into the scene.", symbol: "CL", color: "#94bb6f" },
-  { id: "knife_clark", title: "Sharp Dressed", description: "Give Clark his knife.", symbol: "KN", color: "#df7777" },
   { id: "error_logo", title: "Object Object", description: "Buy the suspicious error icon.", symbol: "ERR", color: "#c4c4c4" },
   { id: "rebirth_once", title: "Second Bloom", description: "Rebirth for the first time.", symbol: "↻", color: "#d898e1", stat: "rebirths", target: 1 },
   { id: "rebirth_ten", title: "Again? Again.", description: "Rebirth 10 times.", symbol: "10", color: "#bf78d4", stat: "rebirths", target: 10 },
@@ -336,7 +308,9 @@ function saveAchievementData() {
 }
 
 function updateAchievementButton() {
-  const unlockedCount = Object.keys(achievementData.unlocked).length;
+  const unlockedCount = ACHIEVEMENT_DEFINITIONS.filter(
+    (definition) => achievementData.unlocked[definition.id],
+  ).length;
   achievementMenuButton.textContent = `achievements ${unlockedCount}/${ACHIEVEMENT_DEFINITIONS.length}`;
   achievementSummary.textContent = `${unlockedCount} of ${ACHIEVEMENT_DEFINITIONS.length} unlocked`;
 }
@@ -404,8 +378,9 @@ function unlockAchievement(id) {
     achievementToast.hidden = true;
   }, 4200);
 
-  const nonCollectorCount = Object.keys(achievementData.unlocked)
-    .filter((achievementId) => achievementId !== "collector").length;
+  const nonCollectorCount = ACHIEVEMENT_DEFINITIONS.filter(
+    (definition) => definition.id !== "collector" && achievementData.unlocked[definition.id],
+  ).length;
   if (id !== "collector" && nonCollectorCount >= 20) unlockAchievement("collector");
 }
 
@@ -425,9 +400,6 @@ function checkFullLoadoutAchievement() {
   if (
     carOwned &&
     yellowOwned &&
-    biggerSceneOwned &&
-    clarkOwned &&
-    clarkKnifeOwned &&
     errorLogoOwned &&
     toolbarOwned &&
     monsterboxOwned &&
@@ -499,10 +471,7 @@ function loadEconomy() {
         ? Math.max(0, Math.min(AUTOSPAWN_MAX_LEVEL, Math.floor(saved.autospawnLevel)))
         : saved.autospawn === true ? 1 : 0,
       yellowOwned: saved.yellowOwned === true,
-      biggerSceneOwned: saved.biggerSceneOwned === true,
       carOwned: saved.carOwned === true,
-      clarkOwned: saved.clarkOwned === true,
-      clarkKnifeOwned: saved.clarkKnifeOwned === true,
       errorLogoOwned: saved.errorLogoOwned === true,
       toolbarOwned: saved.toolbarOwned === true,
       monsterboxOwned: saved.monsterboxOwned === true,
@@ -534,10 +503,7 @@ function loadEconomy() {
       currency: 0,
       autospawnLevel: 0,
       yellowOwned: false,
-      biggerSceneOwned: false,
       carOwned: false,
-      clarkOwned: false,
-      clarkKnifeOwned: false,
       errorLogoOwned: false,
       toolbarOwned: false,
       monsterboxOwned: false,
@@ -558,10 +524,7 @@ const savedEconomy = loadEconomy();
 let floweyCurrency = savedEconomy.currency;
 let autospawnLevel = savedEconomy.autospawnLevel;
 let yellowOwned = savedEconomy.yellowOwned;
-let biggerSceneOwned = savedEconomy.biggerSceneOwned;
 let carOwned = savedEconomy.carOwned;
-let clarkOwned = savedEconomy.clarkOwned;
-let clarkKnifeOwned = savedEconomy.clarkKnifeOwned;
 let errorLogoOwned = savedEconomy.errorLogoOwned;
 let toolbarOwned = savedEconomy.toolbarOwned;
 let monsterboxOwned = savedEconomy.monsterboxOwned;
@@ -580,22 +543,12 @@ let bladeAudioPaused = false;
 let extraSpawnerCount = savedEconomy.spawnerCount;
 let nextAutospawnAt = 0;
 let yellowCompanion = null;
-let clarkCompanion = null;
-let knifeClarkCompanion = null;
 let yellowAimMode = false;
-let sceneZoom = 1;
-let cameraX = biggerSceneOwned ? getViewWidth() / 2 : 0;
-let cameraY = biggerSceneOwned ? getViewHeight() / 2 : 0;
-let sceneOriginX = 0;
-let sceneOriginY = 0;
-let panMode = false;
-let activePan = null;
 const yellowBullets = [];
 const extraFlowerSpawners = [];
 const spawnerParticles = [];
 const swoonEffects = [];
 const laserEffects = [];
-const clarkShockwaves = [];
 const errorTrailPixels = new Map();
 let errorLogo = null;
 let errorLogoMask = null;
@@ -619,11 +572,11 @@ function getViewHeight() {
 }
 
 function getWorldWidth() {
-  return getViewWidth() * (biggerSceneOwned ? 2 : 1);
+  return getViewWidth();
 }
 
 function getWorldHeight() {
-  return getViewHeight() * (biggerSceneOwned ? 2 : 1);
+  return getViewHeight();
 }
 
 function getLampX() {
@@ -635,14 +588,7 @@ function getLampY() {
 }
 
 function getFlowerySpawnerRatios(index) {
-  const [baseX, baseY] =
-    FLOWERY_SPAWNER_POSITIONS[index % FLOWERY_SPAWNER_POSITIONS.length];
-  if (!biggerSceneOwned) return [baseX, baseY];
-  const spread = 1.55;
-  return [
-    Math.max(0.035, Math.min(0.965, 0.5 + (baseX - 0.5) * spread)),
-    Math.max(0.035, Math.min(0.965, 0.5 + (baseY - 0.5) * spread)),
-  ];
+  return FLOWERY_SPAWNER_POSITIONS[index % FLOWERY_SPAWNER_POSITIONS.length];
 }
 
 function placeFlowerySpawner(spawner) {
@@ -659,59 +605,16 @@ function placeFlowerySpawner(spawner) {
   );
 }
 
-function clampCamera() {
-  cameraX = Math.max(0, Math.min(
-    Math.max(0, getWorldWidth() - getViewWidth() / sceneZoom),
-    cameraX,
-  ));
-  cameraY = Math.max(0, Math.min(
-    Math.max(0, getWorldHeight() - getViewHeight() / sceneZoom),
-    cameraY,
-  ));
-}
-
-function updateSceneNavigationUI() {
-  if (!zoomLevelLabel || !panSceneButton) return;
-  zoomLevelLabel.value = `${Math.round(sceneZoom * 100)}%`;
-  zoomLevelLabel.textContent = zoomLevelLabel.value;
-  panSceneButton.classList.toggle("is-panning", panMode);
-  panSceneButton.setAttribute("aria-pressed", String(panMode));
-  panSceneButton.textContent = panMode ? "stop panning" : "pan scene";
-}
-
 function updateSceneBackground() {
-  if (!biggerSceneOwned) {
-    gameScene.style.backgroundPosition = "0 0";
-    gameScene.style.backgroundSize = "320px 240px";
-    return;
-  }
-  gameScene.style.backgroundPosition =
-    `${(sceneOriginX - cameraX) * sceneZoom}px ${(sceneOriginY - cameraY) * sceneZoom}px`;
-  gameScene.style.backgroundSize = `${320 * sceneZoom}px ${240 * sceneZoom}px`;
-}
-
-function worldPointFromScreen(x, y) {
-  return {
-    x: cameraX + x / sceneZoom,
-    y: cameraY + y / sceneZoom,
-  };
+  gameScene.style.backgroundPosition = "0 0";
+  gameScene.style.backgroundSize = "320px 240px";
 }
 
 function isWorldRectVisible(x, y, width, height) {
-  const right = cameraX + getViewWidth() / sceneZoom;
-  const bottom = cameraY + getViewHeight() / sceneZoom;
-  return x < right && x + width > cameraX && y < bottom && y + height > cameraY;
-}
-
-function zoomAt(screenX, screenY, nextZoom) {
-  if (!biggerSceneOwned) return;
-  const anchor = worldPointFromScreen(screenX, screenY);
-  sceneZoom = Math.max(MIN_SCENE_ZOOM, Math.min(MAX_SCENE_ZOOM, nextZoom));
-  cameraX = anchor.x - screenX / sceneZoom;
-  cameraY = anchor.y - screenY / sceneZoom;
-  clampCamera();
-  updateSceneNavigationUI();
-  updateSceneBackground();
+  return x < getViewWidth() &&
+    x + width > 0 &&
+    y < getViewHeight() &&
+    y + height > 0;
 }
 
 function loadAudioSettings() {
@@ -719,12 +622,12 @@ function loadAudioSettings() {
     const saved = getActiveSaveSnapshot()?.audioSettings
       || JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) || "{}");
     return {
-      voice: Number.isFinite(saved.voice) ? Math.max(0, Math.min(1, saved.voice)) : 1,
-      sfx: Number.isFinite(saved.sfx) ? Math.max(0, Math.min(1, saved.sfx)) : 1,
-      music: Number.isFinite(saved.music) ? Math.max(0, Math.min(1, saved.music)) : 0.35,
+      voice: Number.isFinite(saved.voice) ? Math.max(0, Math.min(1, saved.voice)) : 0.15,
+      sfx: Number.isFinite(saved.sfx) ? Math.max(0, Math.min(1, saved.sfx)) : 0.15,
+      music: Number.isFinite(saved.music) ? Math.max(0, Math.min(1, saved.music)) : 0.15,
     };
   } catch {
-    return { voice: 1, sfx: 1, music: 0.35 };
+    return { voice: 0.15, sfx: 0.15, music: 0.15 };
   }
 }
 
@@ -743,10 +646,7 @@ function captureEconomySnapshot() {
     currency: floweyCurrency,
     autospawnLevel,
     yellowOwned,
-    biggerSceneOwned,
     carOwned,
-    clarkOwned,
-    clarkKnifeOwned,
     errorLogoOwned,
     toolbarOwned,
     monsterboxOwned,
@@ -813,11 +713,8 @@ function getCurrencyMultiplier() {
 function getRunUpgradeProgress() {
   const runUpgrades = [
     autospawnLevel >= AUTOSPAWN_MAX_LEVEL,
-    biggerSceneOwned,
     yellowOwned,
     carOwned,
-    clarkOwned,
-    clarkKnifeOwned,
     errorLogoOwned,
     toolbarOwned,
     monsterboxOwned,
@@ -887,10 +784,6 @@ function updateShopUI() {
       : `Autospawn upgrade L${nextAutospawnLevel} · ƒ${autospawnPrice}`;
   buyAutospawnButton.disabled =
     autospawnLevel >= AUTOSPAWN_MAX_LEVEL || floweyCurrency < autospawnPrice;
-  buyBiggerSceneButton.textContent = biggerSceneOwned
-    ? "Make scene bigger · OWNED"
-    : `Make scene bigger · ƒ${BIGGER_SCENE_PRICE}`;
-  buyBiggerSceneButton.disabled = biggerSceneOwned || floweyCurrency < BIGGER_SCENE_PRICE;
   buyYellowButton.textContent = yellowOwned
     ? "Spawn Yellow · OWNED"
     : `Spawn Yellow · ƒ${YELLOW_PRICE}`;
@@ -899,15 +792,6 @@ function updateShopUI() {
     ? "Flowery crusher car · OWNED"
     : `Flowery crusher car · ƒ${CAR_PRICE}`;
   buyCarButton.disabled = carOwned || floweyCurrency < CAR_PRICE;
-  buyClarkButton.textContent = clarkOwned
-    ? "Clark stanky leg · OWNED"
-    : `Clark stanky leg · ƒ${CLARK_PRICE}`;
-  buyClarkButton.disabled = clarkOwned || floweyCurrency < CLARK_PRICE;
-  buyClarkKnifeButton.textContent = clarkKnifeOwned
-    ? "Clark knife · OWNED"
-    : `Clark knife · ƒ${CLARK_KNIFE_PRICE}`;
-  buyClarkKnifeButton.disabled =
-    clarkKnifeOwned || floweyCurrency < CLARK_KNIFE_PRICE;
   buyErrorLogoButton.textContent = errorLogoOwned
     ? "[Object Object] · OWNED"
     : `[Object Object] · ƒ${ERROR_LOGO_PRICE}`;
@@ -922,16 +806,11 @@ function updateShopUI() {
     extraSpawnerCount >= spawnerLimit || floweyCurrency < spawnerPrice;
   yellowControls.hidden = !yellowOwned;
   toolbarControls.hidden = !toolbarOwned;
-  sceneNavigation.hidden = !biggerSceneOwned;
-  updateSceneNavigationUI();
   const ownedUpgrades = [
     hasMonsterboxes() && "Monsterbox",
     toolbarOwned && "toolbar",
     yellowOwned && "Yellow",
-    biggerSceneOwned && "expanded scene",
     carOwned && "crusher car",
-    clarkOwned && "Clark",
-    clarkKnifeOwned && "Clark knife",
     errorLogoOwned && "[Object Object]",
   ].filter(Boolean);
   const upgradeSummary = ownedUpgrades.length ? `${ownedUpgrades.join(", ")} active. ` : "";
@@ -992,7 +871,6 @@ function saveDeadFloweries() {
 
 function updateDeathCount() {
   floweriesKilled = deadFloweries.length;
-  deathCountLabel.textContent = String(floweriesKilled);
   graveCountLabel.textContent = String(floweriesKilled);
 }
 
@@ -1201,14 +1079,6 @@ const YELLOW_GUN_WIDTH = 105;
 const YELLOW_GUN_HEIGHT = 61;
 const YELLOW_BULLET_SPEED = 520;
 const YELLOW_BULLET_RADIUS = 4;
-const CLARK_WIDTH = 32;
-const CLARK_HEIGHT = 59;
-const CLARK_SPEED = 68;
-const KNIFE_CLARK_WIDTH = 31;
-const KNIFE_CLARK_HEIGHT = 104;
-const KNIFE_CLARK_SPEED = 112;
-const KNIFE_CLARK_STUCK_TIMEOUT = 3500;
-const KNIFE_CLARK_STUCK_PROGRESS_DISTANCE = 18;
 const yellowSprites = Object.fromEntries(
   ["up", "left", "down"].map((direction) => [
     direction,
@@ -1221,10 +1091,6 @@ const yellowSprites = Object.fromEntries(
 );
 const yellowGunSprite = new Image();
 yellowGunSprite.src = "uploads/yellow_gun.png";
-const clarkSprite = new Image();
-clarkSprite.src = "uploads/clark_stanky_leg_pixelated.png";
-const knifeClarkSprite = new Image();
-knifeClarkSprite.src = "uploads/clark_knife.png";
 const errorLogoSprite = new Image();
 errorLogoSprite.src = "uploads/icon_web_error.png";
 const monsterboxInactiveSprite = new Image();
@@ -1342,63 +1208,6 @@ entranceCanvas.width = SPRITE_WIDTH;
 entranceCanvas.height = SPRITE_HEIGHT;
 const entranceContext = entranceCanvas.getContext("2d");
 const splats = [];
-function shiftWorldObject(object, offsetX, offsetY) {
-  if (!object) return;
-  if (Number.isFinite(object.x)) object.x += offsetX;
-  if (Number.isFinite(object.y)) object.y += offsetY;
-  if (Number.isFinite(object.targetX)) object.targetX += offsetX;
-  if (Number.isFinite(object.targetY)) object.targetY += offsetY;
-}
-
-function expandSceneAroundCurrentView() {
-  const offsetX = getViewWidth() / 2;
-  const offsetY = getViewHeight() / 2;
-  const pixelOffsetX = Math.round(offsetX);
-  const pixelOffsetY = Math.round(offsetY);
-  sceneOriginX += offsetX;
-  sceneOriginY += offsetY;
-  for (const flowery of floweries) shiftWorldObject(flowery, offsetX, offsetY);
-  for (const car of cars) shiftWorldObject(car, offsetX, offsetY);
-  for (const car of ralseiCars) shiftWorldObject(car, offsetX, offsetY);
-  for (const spawner of extraFlowerSpawners) placeFlowerySpawner(spawner);
-  for (const particle of spawnerParticles) shiftWorldObject(particle, offsetX, offsetY);
-  for (const bullet of yellowBullets) shiftWorldObject(bullet, offsetX, offsetY);
-  for (const explosion of explosions) shiftWorldObject(explosion, offsetX, offsetY);
-  for (const splat of splats) {
-    for (const particle of splat.particles) {
-      shiftWorldObject(particle, offsetX, offsetY);
-      particle.groundY += offsetY;
-    }
-  }
-  for (const group of floweryGroups) shiftWorldObject(group, offsetX, offsetY);
-  shiftWorldObject(activeRalsei, offsetX, offsetY);
-  shiftWorldObject(errorLogo, offsetX, offsetY);
-  if (errorTrailPixels.size > 0) {
-    const shiftedPixels = [];
-    for (const pixel of errorTrailPixels.values()) {
-      pixel.x = Math.floor((pixel.x + pixelOffsetX) / ERROR_TRAIL_PIXEL_SIZE) *
-        ERROR_TRAIL_PIXEL_SIZE;
-      pixel.y = Math.floor((pixel.y + pixelOffsetY) / ERROR_TRAIL_PIXEL_SIZE) *
-        ERROR_TRAIL_PIXEL_SIZE;
-      shiftedPixels.push([`${pixel.x},${pixel.y}`, pixel]);
-    }
-    errorTrailPixels.clear();
-    for (const [key, pixel] of shiftedPixels) errorTrailPixels.set(key, pixel);
-  }
-  shiftWorldObject(yellowCompanion, offsetX, offsetY);
-  if (yellowCompanion) {
-    yellowCompanion.gunX += offsetX;
-    yellowCompanion.gunY += offsetY;
-    yellowCompanion.targetGunX += offsetX;
-    yellowCompanion.targetGunY += offsetY;
-  }
-  shiftWorldObject(clarkCompanion, offsetX, offsetY);
-  shiftWorldObject(knifeClarkCompanion, offsetX, offsetY);
-  cameraX += offsetX;
-  cameraY += offsetY;
-  clampCamera();
-  updateSceneBackground();
-}
 
 const splatParticleSprite = new Image();
 splatParticleSprite.src = "uploads/flowery_splat_particle.png";
@@ -1478,10 +1287,8 @@ function handleFloweryVoiceEnd(flowery) {
 
 function resizeCanvas() {
   const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
-  const previousWorldCenterX =
-    (canvas.width / pixelRatio) * (biggerSceneOwned ? 1 : 0.5);
-  const previousWorldCenterY =
-    (canvas.height / pixelRatio) * (biggerSceneOwned ? 1 : 0.5);
+  const previousWorldCenterX = (canvas.width / pixelRatio) * 0.5;
+  const previousWorldCenterY = (canvas.height / pixelRatio) * 0.5;
   canvas.width = Math.round(getViewWidth() * pixelRatio);
   canvas.height = Math.round(getViewHeight() * pixelRatio);
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
@@ -1511,21 +1318,6 @@ function resizeCanvas() {
     yellowCompanion.x = Math.max(0, Math.min(yellowCompanion.x, worldWidth - YELLOW_WIDTH));
     yellowCompanion.y = Math.max(0, Math.min(yellowCompanion.y, worldHeight - YELLOW_HEIGHT));
   }
-  if (clarkCompanion) {
-    clarkCompanion.x = Math.max(0, Math.min(clarkCompanion.x, worldWidth - CLARK_WIDTH));
-    clarkCompanion.y = Math.max(0, Math.min(clarkCompanion.y, worldHeight - CLARK_HEIGHT));
-  }
-  if (knifeClarkCompanion) {
-    knifeClarkCompanion.x = Math.max(
-      0,
-      Math.min(knifeClarkCompanion.x, worldWidth - KNIFE_CLARK_WIDTH),
-    );
-    knifeClarkCompanion.y = Math.max(
-      0,
-      Math.min(knifeClarkCompanion.y, worldHeight - KNIFE_CLARK_HEIGHT),
-    );
-  }
-  clampCamera();
   updateSceneBackground();
 }
 
@@ -1756,13 +1548,9 @@ function playRalseiBlip() {
 }
 
 function getFloweryVoiceVolumeFactor(flowery) {
-  const screenX =
-    (flowery.x + SPRITE_WIDTH / 2 - cameraX) * sceneZoom;
-  const screenY =
-    (flowery.y + SPRITE_HEIGHT / 2 - cameraY) * sceneZoom;
   const distance = Math.hypot(
-    screenX - getViewWidth() / 2,
-    screenY - getViewHeight() / 2,
+    flowery.x + SPRITE_WIDTH / 2 - getViewWidth() / 2,
+    flowery.y + SPRITE_HEIGHT / 2 - getViewHeight() / 2,
   );
   return Math.max(0, 1 - distance / FLOWERY_VOICE_AUDIBLE_RADIUS);
 }
@@ -2098,8 +1886,8 @@ function updateRalsei(now, delta, width, height) {
   if (ralsei.mode === "talking" || ralsei.mode === "player-speech") {
     const lineWidth = ralseiLine.offsetWidth;
     const lineHeight = ralseiLine.offsetHeight;
-    const screenX = (ralsei.x + RALSEI_WIDTH / 2 - cameraX) * sceneZoom;
-    const screenY = (ralsei.y - cameraY) * sceneZoom;
+    const screenX = ralsei.x + RALSEI_WIDTH / 2;
+    const screenY = ralsei.y;
     const left = Math.max(
       lineWidth / 2 + 8,
       Math.min(getViewWidth() - lineWidth / 2 - 8, screenX),
@@ -2109,7 +1897,7 @@ function updateRalsei(now, delta, width, height) {
     ralseiLine.style.top = `${
       above >= 8
         ? above
-        : Math.min(getViewHeight() - lineHeight - 8, screenY + RALSEI_HEIGHT * sceneZoom + 12)
+        : Math.min(getViewHeight() - lineHeight - 8, screenY + RALSEI_HEIGHT + 12)
     }px`;
   }
 
@@ -2482,295 +2270,6 @@ function createYellow() {
   chooseYellowTarget();
 }
 
-function createClark() {
-  const now = performance.now();
-  clarkCompanion = {
-    x: Math.max(0, Math.min(getWorldWidth() - CLARK_WIDTH, getWorldWidth() * 0.56)),
-    y: Math.max(0, Math.min(getWorldHeight() - CLARK_HEIGHT, getWorldHeight() * 0.55)),
-    targetX: 0,
-    targetY: 0,
-    heading: "right",
-    nextMoveAt: now,
-    nextAttackAt: now + 900,
-    walkPhase: Math.random() * Math.PI * 2,
-  };
-  chooseClarkTarget(now);
-}
-
-function createKnifeClark() {
-  knifeClarkCompanion = {
-    x: Math.max(0, Math.min(getWorldWidth() - KNIFE_CLARK_WIDTH, getWorldWidth() * 0.44)),
-    y: Math.max(0, Math.min(getWorldHeight() - KNIFE_CLARK_HEIGHT, getWorldHeight() * 0.55)),
-    heading: "right",
-    nextAttackAt: performance.now() + 900,
-    walkPhase: Math.random() * Math.PI * 2,
-    stuckSince: null,
-    stuckAnchorX: null,
-    stuckAnchorY: null,
-  };
-}
-
-function chooseClarkTarget(now) {
-  if (!clarkCompanion) return;
-  const clark = clarkCompanion;
-  clark.targetX = Math.random() * Math.max(0, getWorldWidth() - CLARK_WIDTH);
-  clark.targetY = Math.random() * Math.max(0, getWorldHeight() - CLARK_HEIGHT);
-  clark.nextMoveAt = now;
-}
-
-function performClarkShockwave(clark, now, soundPrefix, canTarget = () => true) {
-  if (now < clark.nextAttackAt) return;
-  const centerX = clark.x + clark.width / 2;
-  const centerY = clark.y + clark.height / 2;
-  const nearby = floweries.flatMap((flowery) => {
-    if (
-      flowery.entering ||
-      flowery.flung ||
-      flowery.ralseiHeld ||
-      !canTarget(flowery)
-    ) return [];
-    return [{
-      flowery,
-      distance: Math.hypot(
-        flowery.x + SPRITE_WIDTH / 2 - centerX,
-        flowery.y + SPRITE_HEIGHT / 2 - centerY,
-      ),
-    }];
-  });
-  const attack = ["strong", "mid", "weak"].find((strength) => {
-    const spec = CLARK_ATTACKS[strength];
-    return nearby.filter((target) => target.distance <= spec.range).length >= spec.minTargets;
-  });
-  if (!attack) return;
-
-  const spec = CLARK_ATTACKS[attack];
-  const targets = nearby
-    .filter((target) => target.distance <= spec.range)
-    .map((target) => target.flowery);
-  clarkShockwaves.push({
-    x: centerX,
-    y: centerY,
-    startedAt: now,
-    range: spec.range,
-    duration: spec.duration,
-    strength: attack,
-  });
-  playSoundEffect(`uploads/${soundPrefix}_${attack}.wav`, 1);
-  for (const flowery of targets) squishFlowery(flowery, now);
-  clark.nextAttackAt = now + spec.cooldown;
-}
-
-function squishFloweryOverlappingClark(clark, now, canTarget = () => true) {
-  for (const flowery of [...floweries]) {
-    if (
-      flowery.entering ||
-      flowery.flung ||
-      flowery.ralseiHeld ||
-      !canTarget(flowery)
-    ) continue;
-    const overlap = flowery.x < clark.x + clark.width &&
-      flowery.x + SPRITE_WIDTH > clark.x &&
-      flowery.y < clark.y + clark.height &&
-      flowery.y + SPRITE_HEIGHT > clark.y;
-    if (overlap) squishFlowery(flowery, now);
-  }
-}
-
-function updateClark(now, delta, width, height) {
-  if (!clarkCompanion) return;
-  const clark = clarkCompanion;
-  clark.width = CLARK_WIDTH;
-  clark.height = CLARK_HEIGHT;
-  if (now >= clark.nextMoveAt) {
-    const dx = clark.targetX - clark.x;
-    const dy = clark.targetY - clark.y;
-    const distance = Math.hypot(dx, dy);
-    if (distance < 3) {
-      clark.nextMoveAt = now + 180 + Math.random() * 500;
-      chooseClarkTarget(clark.nextMoveAt);
-    } else {
-      clark.x += (dx / distance) * CLARK_SPEED * delta;
-      clark.y += (dy / distance) * CLARK_SPEED * delta;
-      if (Math.abs(dx) > Math.abs(dy) * 0.38) {
-        clark.heading = dx < 0 ? "left" : "right";
-      }
-      clark.walkPhase += delta * 13;
-      if (distance <= CLARK_SPEED * delta) clark.nextMoveAt = now;
-    }
-  }
-  clark.x = Math.max(0, Math.min(Math.max(0, width - CLARK_WIDTH), clark.x));
-  clark.y = Math.max(0, Math.min(Math.max(0, height - CLARK_HEIGHT), clark.y));
-  performClarkShockwave(clark, now, "clark_attack");
-  squishFloweryOverlappingClark(clark, now);
-}
-
-function updateKnifeClark(now, delta, width, height) {
-  if (!knifeClarkCompanion) return;
-  const clark = knifeClarkCompanion;
-  clark.width = KNIFE_CLARK_WIDTH;
-  clark.height = KNIFE_CLARK_HEIGHT;
-  const safeZones = getKnifeClarkSafeZones();
-  let nearest = null;
-  let nearestDistance = Infinity;
-  for (const flowery of floweries) {
-    if (
-      flowery.entering ||
-      flowery.flung ||
-      flowery.ralseiHeld ||
-      isFloweryInKnifeSafeZone(flowery, safeZones)
-    ) continue;
-    const dx = flowery.x + SPRITE_WIDTH / 2 - (clark.x + clark.width / 2);
-    const dy = flowery.y + SPRITE_HEIGHT / 2 - (clark.y + clark.height / 2);
-    const distance = Math.hypot(dx, dy);
-    if (distance < nearestDistance) {
-      nearest = { dx, dy, distance };
-      nearestDistance = distance;
-    }
-  }
-  const isChasing = nearest && nearest.distance > 26;
-  if (isChasing) {
-    clark.x += (nearest.dx / nearest.distance) * KNIFE_CLARK_SPEED * delta;
-    clark.y += (nearest.dy / nearest.distance) * KNIFE_CLARK_SPEED * delta;
-    if (Math.abs(nearest.dx) > Math.abs(nearest.dy) * 0.38) {
-      clark.heading = nearest.dx < 0 ? "left" : "right";
-    }
-    clark.walkPhase += delta * 15;
-  }
-  keepKnifeClarkOutsideSafeZones(clark, safeZones, width, height);
-  clark.x = Math.max(0, Math.min(Math.max(0, width - KNIFE_CLARK_WIDTH), clark.x));
-  clark.y = Math.max(0, Math.min(Math.max(0, height - KNIFE_CLARK_HEIGHT), clark.y));
-  if (isChasing) {
-    if (clark.stuckSince === null) {
-      clark.stuckSince = now;
-      clark.stuckAnchorX = clark.x;
-      clark.stuckAnchorY = clark.y;
-    } else if (
-      Math.hypot(clark.x - clark.stuckAnchorX, clark.y - clark.stuckAnchorY) >=
-      KNIFE_CLARK_STUCK_PROGRESS_DISTANCE
-    ) {
-      clark.stuckSince = now;
-      clark.stuckAnchorX = clark.x;
-      clark.stuckAnchorY = clark.y;
-    } else if (now - clark.stuckSince >= KNIFE_CLARK_STUCK_TIMEOUT) {
-      respawnKnifeClark(clark, now, width, height, safeZones);
-    }
-  } else {
-    clark.stuckSince = null;
-    clark.stuckAnchorX = null;
-    clark.stuckAnchorY = null;
-  }
-  performClarkShockwave(
-    clark,
-    now,
-    "wiredclark",
-    (flowery) => !isFloweryInKnifeSafeZone(flowery, safeZones),
-  );
-  squishFloweryOverlappingClark(
-    clark,
-    now,
-    (flowery) => !isFloweryInKnifeSafeZone(flowery, safeZones),
-  );
-}
-
-function respawnKnifeClark(clark, now, width, height, safeZones) {
-  const columns = 9;
-  const rows = 7;
-  const maxX = Math.max(0, width - KNIFE_CLARK_WIDTH);
-  const maxY = Math.max(0, height - KNIFE_CLARK_HEIGHT);
-  const edgeMarginX = Math.min(72, maxX / 2);
-  const edgeMarginY = Math.min(72, maxY / 2);
-  const candidates = [];
-
-  for (let row = 0; row < rows; row += 1) {
-    for (let column = 0; column < columns; column += 1) {
-      const x = edgeMarginX +
-        (Math.max(0, maxX - edgeMarginX * 2) * column) / (columns - 1);
-      const y = edgeMarginY +
-        (Math.max(0, maxY - edgeMarginY * 2) * row) / (rows - 1);
-      const centerX = x + KNIFE_CLARK_WIDTH / 2;
-      const centerY = y + KNIFE_CLARK_HEIGHT / 2;
-      const edgeClearance =
-        Math.min(x, maxX - x, y, maxY - y) - 12;
-      const clearance = safeZones.reduce((minimum, zone) =>
-        Math.min(
-          minimum,
-          Math.hypot(centerX - zone.x, centerY - zone.y) -
-            zone.radius -
-            KNIFE_CLARK_HEIGHT / 2 -
-            8,
-        ), edgeClearance);
-      candidates.push({ x, y, clearance });
-    }
-  }
-
-  candidates.sort((a, b) => b.clearance - a.clearance);
-  const bestClearance = candidates[0]?.clearance ?? 0;
-  const bestCandidates = candidates.filter(
-    (candidate) => candidate.clearance >= bestClearance - 12,
-  );
-  const spawn = bestCandidates[Math.floor(Math.random() * bestCandidates.length)];
-  clark.x = spawn?.x ?? maxX / 2;
-  clark.y = spawn?.y ?? maxY / 2;
-  clark.heading = "right";
-  clark.walkPhase = Math.random() * Math.PI * 2;
-  clark.nextAttackAt = now + 600;
-  clark.stuckSince = null;
-  clark.stuckAnchorX = null;
-  clark.stuckAnchorY = null;
-}
-
-function getKnifeClarkSafeZones() {
-  const zones = [
-    { x: getLampX(), y: getLampY(), radius: 190 },
-    ...extraFlowerSpawners.map((spawner) => ({
-      x: spawner.x + FLOWERY_SPAWNER_SIZE / 2,
-      y: spawner.y + FLOWERY_SPAWNER_SIZE / 2,
-      radius: 132,
-    })),
-  ];
-  for (const box of getMonsterboxPositions()) {
-    zones.push({
-      x: box.x + MONSTERBOX_SIZE / 2,
-      y: box.y + MONSTERBOX_SIZE / 2,
-      radius: 132,
-    });
-  }
-  return zones;
-}
-
-function isFloweryInKnifeSafeZone(flowery, safeZones) {
-  const x = flowery.x + SPRITE_WIDTH / 2;
-  const y = flowery.y + SPRITE_HEIGHT / 2;
-  return safeZones.some((zone) =>
-    Math.hypot(x - zone.x, y - zone.y) <= zone.radius,
-  );
-}
-
-function keepKnifeClarkOutsideSafeZones(clark, safeZones, width, height) {
-  const clearance = KNIFE_CLARK_HEIGHT / 2 + 8;
-  for (let pass = 0; pass < 5; pass += 1) {
-    for (let index = 0; index < safeZones.length; index += 1) {
-      const zone = safeZones[index];
-      let dx = clark.x + clark.width / 2 - zone.x;
-      let dy = clark.y + clark.height / 2 - zone.y;
-      let distance = Math.hypot(dx, dy);
-      const minDistance = zone.radius + clearance;
-      if (distance >= minDistance) continue;
-      if (distance < 0.001) {
-        const angle = (index + 1) * 2.399963229728653;
-        dx = Math.cos(angle);
-        dy = Math.sin(angle);
-        distance = 1;
-      }
-      const push = minDistance - distance;
-      clark.x += (dx / distance) * push;
-      clark.y += (dy / distance) * push;
-      clark.x = Math.max(0, Math.min(Math.max(0, width - clark.width), clark.x));
-      clark.y = Math.max(0, Math.min(Math.max(0, height - clark.height), clark.y));
-    }
-  }
-}
-
 function drawPixelShadow(centerX, groundY, width, height, opacity = 0.38) {
   const pixelStep = 2;
   const top = Math.floor((groundY - height / 2) / pixelStep) * pixelStep;
@@ -2784,66 +2283,6 @@ function drawPixelShadow(centerX, groundY, width, height, opacity = 0.38) {
     const right = Math.ceil((centerX + halfWidth) / pixelStep) * pixelStep;
     context.fillRect(left, y, Math.max(pixelStep, right - left), pixelStep);
   }
-  context.restore();
-}
-
-function drawClark() {
-  if (!clarkCompanion || !clarkSprite.complete || !clarkSprite.naturalWidth) return;
-  const clark = clarkCompanion;
-  const bob = Math.sin(clark.walkPhase) * 2.2;
-  const lean = Math.sin(clark.walkPhase) * 0.045;
-  drawPixelShadow(
-    clark.x + CLARK_WIDTH / 2,
-    clark.y + CLARK_HEIGHT - 3,
-    31,
-    8,
-    0.4,
-  );
-  context.save();
-  context.translate(
-    Math.round(clark.x + CLARK_WIDTH / 2),
-    Math.round(clark.y + CLARK_HEIGHT / 2 + bob),
-  );
-  if (clark.heading === "left") context.scale(-1, 1);
-  context.rotate(lean);
-  context.drawImage(
-    clarkSprite,
-    -CLARK_WIDTH / 2,
-    -CLARK_HEIGHT / 2,
-    CLARK_WIDTH,
-    CLARK_HEIGHT,
-  );
-  context.restore();
-}
-
-function drawKnifeClark() {
-  if (
-    !knifeClarkCompanion ||
-    !knifeClarkSprite.complete ||
-    !knifeClarkSprite.naturalWidth
-  ) return;
-  const clark = knifeClarkCompanion;
-  const bob = Math.sin(clark.walkPhase) * 1.8;
-  drawPixelShadow(
-    clark.x + KNIFE_CLARK_WIDTH / 2,
-    clark.y + KNIFE_CLARK_HEIGHT - 2,
-    28,
-    8,
-    0.42,
-  );
-  context.save();
-  context.translate(
-    Math.round(clark.x + KNIFE_CLARK_WIDTH / 2),
-    Math.round(clark.y + KNIFE_CLARK_HEIGHT / 2 + bob),
-  );
-  if (clark.heading === "left") context.scale(-1, 1);
-  context.drawImage(
-    knifeClarkSprite,
-    -KNIFE_CLARK_WIDTH / 2,
-    -KNIFE_CLARK_HEIGHT / 2,
-    KNIFE_CLARK_WIDTH,
-    KNIFE_CLARK_HEIGHT,
-  );
   context.restore();
 }
 
@@ -3694,14 +3133,6 @@ function draw(now) {
   const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   context.clearRect(0, 0, screenWidth, screenHeight);
-  context.setTransform(
-    pixelRatio * sceneZoom,
-    0,
-    0,
-    pixelRatio * sceneZoom,
-    -cameraX * pixelRatio * sceneZoom,
-    -cameraY * pixelRatio * sceneZoom,
-  );
 
   const autospawnInterval = cheatSpawnRate ?? (autospawnLevel > 0
     ? Math.max(850, 4500 * Math.pow(0.78, autospawnLevel - 1))
@@ -3853,8 +3284,6 @@ function draw(now) {
   updateErrorLogo(now, delta);
   updateYellow(now, delta, width, height);
   updateYellowBullets(delta, width, height, now);
-  updateClark(now, delta, width, height);
-  updateKnifeClark(now, delta, width, height);
 
   for (const car of [...cars, ...ralseiCars]) {
     for (const flowery of floweries) {
@@ -3985,8 +3414,6 @@ function draw(now) {
     context.restore();
   }
 
-  drawClark();
-  drawKnifeClark();
   drawYellow();
   drawYellowBullets();
 
@@ -4125,36 +3552,6 @@ function draw(now) {
   }
 
   updateRalsei(now, delta, width, height);
-  for (let index = clarkShockwaves.length - 1; index >= 0; index -= 1) {
-    const wave = clarkShockwaves[index];
-    const progress = (now - wave.startedAt) / wave.duration;
-    if (progress >= 1) {
-      clarkShockwaves.splice(index, 1);
-      continue;
-    }
-    const radius = wave.range * progress;
-    const alpha = 1 - progress;
-    const style = CLARK_SHOCKWAVE_STYLES[wave.strength];
-    context.save();
-    context.globalAlpha = alpha;
-    context.globalCompositeOperation = "lighter";
-    context.shadowColor = style.glow;
-    context.shadowBlur = style.blur;
-    context.strokeStyle = style.color;
-    context.lineWidth = style.width * (1 - progress * 0.45);
-    context.beginPath();
-    context.arc(wave.x, wave.y, radius, 0, Math.PI * 2);
-    context.stroke();
-    const secondProgress = Math.max(0, progress - 0.28) / 0.72;
-    if (secondProgress > 0) {
-      context.globalAlpha = alpha * 0.62;
-      context.lineWidth = Math.max(2, style.width * 0.55 - secondProgress * 2);
-      context.beginPath();
-      context.arc(wave.x, wave.y, wave.range * secondProgress, 0, Math.PI * 2);
-      context.stroke();
-    }
-    context.restore();
-  }
 
   for (let index = laserEffects.length - 1; index >= 0; index -= 1) {
     const laser = laserEffects[index];
@@ -4164,8 +3561,6 @@ function draw(now) {
       continue;
     }
     const fade = progress < 0.72 ? 1 : 1 - (progress - 0.72) / 0.28;
-    const viewRight = cameraX + screenWidth / sceneZoom;
-    const viewBottom = cameraY + screenHeight / sceneZoom;
     context.save();
     context.globalAlpha = Math.max(0, fade);
     context.globalCompositeOperation = "lighter";
@@ -4175,11 +3570,11 @@ function draw(now) {
     context.shadowBlur = 34;
     context.beginPath();
     if (laser.orientation === "horizontal") {
-      context.moveTo(cameraX, laser.coordinate);
-      context.lineTo(viewRight, laser.coordinate);
+      context.moveTo(0, laser.coordinate);
+      context.lineTo(screenWidth, laser.coordinate);
     } else {
-      context.moveTo(laser.coordinate, cameraY);
-      context.lineTo(laser.coordinate, viewBottom);
+      context.moveTo(laser.coordinate, 0);
+      context.lineTo(laser.coordinate, screenHeight);
     }
     context.stroke();
     context.strokeStyle = "#f4ffff";
@@ -4233,23 +3628,34 @@ function isPointOnMonsterbox(x, y) {
   );
 }
 
+const LAMP_CLICK_PADDING = 10;
+
+function isPointOnLamp(x, y) {
+  return (
+    x >= getLampX() - LAMP_WIDTH / 2 - LAMP_CLICK_PADDING &&
+    x <= getLampX() + LAMP_WIDTH / 2 + LAMP_CLICK_PADDING &&
+    y >= getLampY() - LAMP_HEIGHT / 2 &&
+    y <= getLampY() + LAMP_HEIGHT / 2 + LAMP_CLICK_PADDING
+  );
+}
+
+function getFlowerySpawnerAt(x, y) {
+  for (const spawner of extraFlowerSpawners) {
+    if (
+      x >= spawner.x &&
+      x <= spawner.x + FLOWERY_SPAWNER_SIZE &&
+      y >= spawner.y &&
+      y <= spawner.y + FLOWERY_SPAWNER_SIZE
+    ) return spawner;
+  }
+  return null;
+}
+
 canvas.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
-  if (biggerSceneOwned && panMode) {
-    activePan = {
-      pointerId: event.pointerId,
-      lastX: event.clientX,
-      lastY: event.clientY,
-    };
-    canvas.setPointerCapture(event.pointerId);
-    canvas.style.cursor = "grabbing";
-    event.preventDefault();
-    return;
-  }
   const bounds = canvas.getBoundingClientRect();
-  const screenX = event.clientX - bounds.left;
-  const screenY = event.clientY - bounds.top;
-  const { x, y } = worldPointFromScreen(screenX, screenY);
+  const x = event.clientX - bounds.left;
+  const y = event.clientY - bounds.top;
   if (isPointOnMonsterbox(x, y)) {
     monsterboxInactive = !monsterboxInactive;
     monsterboxNextSpawnAt = performance.now() + getMonsterboxInterval();
@@ -4272,8 +3678,19 @@ canvas.addEventListener("pointerdown", (event) => {
     if (selectedAttackTool === "lazer") {
       useLaser(x, y, performance.now());
     } else if (selectedAttackTool === "roaring blade") {
-      useRoaringBlade(x, y, screenX, screenY);
+      useRoaringBlade(x, y, x, y);
     }
+    return;
+  }
+  const spawner = getFlowerySpawnerAt(x, y);
+  if (spawner) {
+    startAudioGraph();
+    addFlowery(spawner);
+    return;
+  }
+  if (isPointOnLamp(x, y)) {
+    startAudioGraph();
+    addFlowery();
     return;
   }
   const flowery = getFloweryAt(x, y);
@@ -4281,51 +3698,20 @@ canvas.addEventListener("pointerdown", (event) => {
 });
 
 canvas.addEventListener("pointermove", (event) => {
-  if (activePan && activePan.pointerId === event.pointerId) {
-    cameraX -= (event.clientX - activePan.lastX) / sceneZoom;
-    cameraY -= (event.clientY - activePan.lastY) / sceneZoom;
-    activePan.lastX = event.clientX;
-    activePan.lastY = event.clientY;
-    clampCamera();
-    updateSceneBackground();
-    canvas.style.cursor = "grabbing";
-    return;
-  }
-  if (biggerSceneOwned && panMode) {
-    canvas.style.cursor = "grab";
-    return;
-  }
   const bounds = canvas.getBoundingClientRect();
-  const point = worldPointFromScreen(
-    event.clientX - bounds.left,
-    event.clientY - bounds.top,
-  );
-  const flowery = getFloweryAt(point.x, point.y);
+  const x = event.clientX - bounds.left;
+  const y = event.clientY - bounds.top;
+  const flowery = getFloweryAt(x, y);
   const specialAttack = toolbarOwned && selectedAttackTool !== "squish";
-  canvas.style.cursor = isPointOnMonsterbox(point.x, point.y)
+  canvas.style.cursor = isPointOnMonsterbox(x, y) ||
+    flowery ||
+    isPointOnLamp(x, y) ||
+    getFlowerySpawnerAt(x, y)
     ? "pointer"
     : yellowAimMode || specialAttack
     ? "crosshair"
-    : flowery ? "pointer" : "default";
+    : "default";
 });
-
-function finishPan(event) {
-  if (!activePan || activePan.pointerId !== event.pointerId) return;
-  activePan = null;
-  if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-  canvas.style.cursor = panMode ? "grab" : "default";
-}
-
-canvas.addEventListener("pointerup", finishPan);
-canvas.addEventListener("pointercancel", finishPan);
-canvas.addEventListener("wheel", (event) => {
-  if (!biggerSceneOwned) return;
-  event.preventDefault();
-  const bounds = canvas.getBoundingClientRect();
-  const screenX = event.clientX - bounds.left;
-  const screenY = event.clientY - bounds.top;
-  zoomAt(screenX, screenY, sceneZoom * Math.exp(-event.deltaY * 0.001));
-}, { passive: false });
 
 function playRandomClip(flowery) {
   if (flowery.silenced) return;
@@ -4360,11 +3746,6 @@ function scheduleNextClip(flowery) {
   }, 1300 + Math.random() * 3200);
 }
 
-spawnButton.addEventListener("click", () => {
-  startAudioGraph();
-  addFlowery();
-});
-
 function performRebirth() {
   if (!getRunUpgradeProgress().maxed) return;
   const restartDrawLoop = overloadSequenceActive || !gameOverScreen.hidden;
@@ -4383,7 +3764,6 @@ function performRebirth() {
   splats.length = 0;
   swoonEffects.length = 0;
   laserEffects.length = 0;
-  clarkShockwaves.length = 0;
   spawnerParticles.length = 0;
   errorTrailPixels.clear();
   errorLogo = null;
@@ -4391,10 +3771,7 @@ function performRebirth() {
   floweyCurrency = 0;
   autospawnLevel = 0;
   yellowOwned = false;
-  biggerSceneOwned = false;
   carOwned = false;
-  clarkOwned = false;
-  clarkKnifeOwned = false;
   errorLogoOwned = false;
   toolbarOwned = false;
   monsterboxOwned = false;
@@ -4404,15 +3781,6 @@ function performRebirth() {
   selectedAttackTool = "squish";
   yellowAimMode = false;
   yellowCompanion = null;
-  clarkCompanion = null;
-  knifeClarkCompanion = null;
-  panMode = false;
-  activePan = null;
-  sceneZoom = 1;
-  cameraX = 0;
-  cameraY = 0;
-  sceneOriginX = 0;
-  sceneOriginY = 0;
   monsterboxNextSpawnAt = hasMonsterboxes()
     ? performance.now() + getMonsterboxInterval()
     : 0;
@@ -4449,13 +3817,9 @@ function performRebirth() {
   for (let index = 0; index < extraSpawnerCount; index += 1) {
     addFlowerySpawner(index);
   }
-  clampCamera();
-  updateSceneNavigationUI();
-  updateSceneBackground();
   updateFloweryCounter(0);
   saveEconomy();
   updateShopUI();
-  spawnButton.focus();
   if (restartDrawLoop) requestAnimationFrame(draw);
 }
 
@@ -4582,32 +3946,6 @@ buyAutospawnButton.addEventListener("click", () => {
   updateShopUI();
 });
 
-buyBiggerSceneButton.addEventListener("click", () => {
-  if (biggerSceneOwned || floweyCurrency < BIGGER_SCENE_PRICE) return;
-  floweyCurrency -= BIGGER_SCENE_PRICE;
-  biggerSceneOwned = true;
-  unlockAchievement("room_to_bloom");
-  expandSceneAroundCurrentView();
-  saveEconomy();
-  updateShopUI();
-});
-
-panSceneButton.addEventListener("click", () => {
-  if (!biggerSceneOwned) return;
-  panMode = !panMode;
-  activePan = null;
-  canvas.style.cursor = panMode ? "grab" : "default";
-  updateSceneNavigationUI();
-});
-
-zoomOutButton.addEventListener("click", () => {
-  zoomAt(getViewWidth() / 2, getViewHeight() / 2, sceneZoom / 1.2);
-});
-
-zoomInButton.addEventListener("click", () => {
-  zoomAt(getViewWidth() / 2, getViewHeight() / 2, sceneZoom * 1.2);
-});
-
 buyYellowButton.addEventListener("click", () => {
   if (yellowOwned || floweyCurrency < YELLOW_PRICE) return;
   floweyCurrency -= YELLOW_PRICE;
@@ -4624,26 +3962,6 @@ buyCarButton.addEventListener("click", () => {
   carOwned = true;
   unlockAchievement("buy_a_car");
   addCar();
-  saveEconomy();
-  updateShopUI();
-});
-
-buyClarkButton.addEventListener("click", () => {
-  if (clarkOwned || floweyCurrency < CLARK_PRICE) return;
-  floweyCurrency -= CLARK_PRICE;
-  clarkOwned = true;
-  unlockAchievement("clark");
-  createClark();
-  saveEconomy();
-  updateShopUI();
-});
-
-buyClarkKnifeButton.addEventListener("click", () => {
-  if (clarkKnifeOwned || floweyCurrency < CLARK_KNIFE_PRICE) return;
-  floweyCurrency -= CLARK_KNIFE_PRICE;
-  clarkKnifeOwned = true;
-  unlockAchievement("knife_clark");
-  createKnifeClark();
   saveEconomy();
   updateShopUI();
 });
@@ -5122,7 +4440,6 @@ tryAgainButton.addEventListener("click", () => {
   splats.length = 0;
   swoonEffects.length = 0;
   laserEffects.length = 0;
-  clarkShockwaves.length = 0;
   spawnerParticles.length = 0;
   monsterboxNextSpawnAt = hasMonsterboxes()
     ? performance.now() + getMonsterboxInterval()
@@ -5148,19 +4465,6 @@ tryAgainButton.addEventListener("click", () => {
   flowerySpatialGrid = null;
   lastFrameTime = 0;
 
-  if (biggerSceneOwned) {
-    cameraX = getViewWidth() / 2;
-    cameraY = getViewHeight() / 2;
-  } else {
-    cameraX = 0;
-    cameraY = 0;
-  }
-  sceneZoom = 1;
-  panMode = false;
-  activePan = null;
-  clampCamera();
-  updateSceneNavigationUI();
-  updateSceneBackground();
   updateFloweryCounter(0);
   gameScene.inert = false;
   shopPanel.inert = false;
@@ -5169,7 +4473,6 @@ tryAgainButton.addEventListener("click", () => {
   overloadSequenceActive = false;
   saveEconomy();
   updateShopUI();
-  spawnButton.focus();
   requestAnimationFrame(draw);
 });
 
@@ -5177,8 +4480,6 @@ window.addEventListener("resize", resizeCanvas);
 updateCheatsConsoleMode();
 resizeCanvas();
 if (carOwned) addCar();
-if (clarkOwned) createClark();
-if (clarkKnifeOwned) createKnifeClark();
 for (let index = 0; index < extraSpawnerCount; index += 1) {
   addFlowerySpawner(index);
 }

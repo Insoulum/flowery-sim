@@ -117,7 +117,7 @@ canvas {
   letter-spacing: 0;
 }
 
-.death-counter {
+.currency-counter {
   position: absolute;
   z-index: 2;
   top: max(16px, env(safe-area-inset-top));
@@ -133,7 +133,7 @@ canvas {
   letter-spacing: 0.04em;
 }
 
-.death-counter strong {
+.currency-counter strong {
   color: #f2df71;
   font-size: 19px;
 }
@@ -169,30 +169,6 @@ canvas {
   border-right: 0;
   border-bottom: 0;
   background: #090a0fe8;
-}
-
-.shop-heading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.shop-heading .currency-row {
-  flex: 1;
-}
-
-.currency-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  color: #e9e6d5;
-  font: 700 13px/1 "Big Shot", "Courier New", monospace;
-}
-
-.currency-row strong {
-  color: #f2df71;
-  font-size: 19px;
 }
 
 .shop-panel button {
@@ -317,46 +293,6 @@ canvas {
   flex-direction: column;
   gap: 9px;
   width: max-content;
-}
-
-.scene-navigation {
-  position: absolute;
-  z-index: 3;
-  top: max(16px, env(safe-area-inset-top));
-  left: 70px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px;
-  border: 1px solid #85826a;
-  background: #090a0fe8;
-}
-
-.scene-navigation[hidden] {
-  display: none;
-}
-
-.scene-navigation button {
-  min-width: 34px;
-  padding: 8px 9px;
-  font-size: 13px;
-  text-align: center;
-}
-
-.scene-navigation #pan-scene {
-  min-width: 76px;
-}
-
-.scene-navigation #pan-scene.is-panning {
-  background: #d6e95b;
-  color: #080900;
-}
-
-.scene-navigation output {
-  min-width: 42px;
-  color: #f2df71;
-  font: 700 12px/1 "Courier New", monospace;
-  text-align: center;
 }
 
 .settings-button {
